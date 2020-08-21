@@ -61,13 +61,13 @@ class OrganizationPluginsTest(APITestCase):
     def test_enabled_not_configured(self):
         plugins.get("webhooks").enable(self.projectA)
         response = self.client.get(self.url)
-        assert filter(lambda x: x["slug"] == "webhooks", response.data)[0]["projectList"] == []
+        assert next(filter(lambda x: x["slug"] == "webhooks", response.data))["projectList"] == []
 
     def test_configured_not_enabled(self):
         plugins.get("trello").disable(self.projectA)
         plugins.get("trello").set_option("key", "some_value", self.projectA)
         response = self.client.get(self.url)
-        assert filter(lambda x: x["slug"] == "trello", response.data)[0]["projectList"] == [
+        assert next(filter(lambda x: x["slug"] == "trello", response.data))["projectList"] == [
             {
                 "projectId": self.projectA.id,
                 "projectSlug": self.projectA.slug,
@@ -82,7 +82,7 @@ class OrganizationPluginsTest(APITestCase):
         plugins.get("trello").enable(self.projectA)
         plugins.get("trello").set_option("key", "some_value", self.projectA)
         response = self.client.get(self.url)
-        assert filter(lambda x: x["slug"] == "trello", response.data)[0]["projectList"] == [
+        assert next(filter(lambda x: x["slug"] == "trello", response.data))["projectList"] == [
             {
                 "projectId": self.projectA.id,
                 "projectSlug": self.projectA.slug,
@@ -97,8 +97,8 @@ class OrganizationPluginsTest(APITestCase):
         plugins.get("trello").set_option("key", "some_value", self.projectA)
         plugins.get("trello").set_option("key", "another_value", self.projectB)
         response = self.client.get(self.url)
-        projectList = filter(lambda x: x["slug"] == "trello", response.data)[0]["projectList"]
-        assert filter(lambda x: x["projectId"] == self.projectA.id, projectList)[0] == {
+        projectList = next(filter(lambda x: x["slug"] == "trello", response.data))["projectList"]
+        assert next(filter(lambda x: x["projectId"] == self.projectA.id, projectList)) == {
             "projectId": self.projectA.id,
             "projectSlug": self.projectA.slug,
             "projectName": self.projectA.name,
@@ -106,7 +106,7 @@ class OrganizationPluginsTest(APITestCase):
             "configured": True,
             "projectPlatform": None,
         }
-        assert filter(lambda x: x["projectId"] == self.projectB.id, projectList)[0] == {
+        assert next(filter(lambda x: x["projectId"] == self.projectB.id, projectList)) == {
             "projectId": self.projectB.id,
             "projectSlug": self.projectB.slug,
             "projectName": self.projectB.name,
